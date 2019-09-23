@@ -49,12 +49,27 @@ def get_users(hashtag):
     users = list(set(users))
     return users
 
+def get_user_metadata(user):
+    print(f'Scraping {user} metadata...')
+    user_url = f'https://www.instagram.com/{user}/?__a=1'
+    user_resp = make_request(user_url).json()
+    followers = user_resp['graphql']['user']['edge_followed_by']['count']
+    following = user_resp['graphql']['user']['edge_follow']['count']
+    full_name = user_resp['graphql']['user']['full_name']
+    profile_pic = user_resp['graphql']['user']['profile_pic_url_hd']
+    return (
+        followers,
+        following,
+        full_name,
+        profile_pic
+    )
 
 def get_data_from_users(users, hashtag):
     scraped_data = []
     try:
         for user_id, user in users:
             print(user)
+            user_metadata = get_user_metadata(user)
             end_cursor = ''
             for i in range(user_page_lim):
                 print(f'Scrape Page {i} of {user}')
@@ -82,7 +97,16 @@ def get_data_from_users(users, hashtag):
                     if loc.latlng == None:
                         continue
                     print(address, loc.latlng)
-                    scraped_data.append([hashtag, user, address, loc.latlng[0], loc.latlng[1]])
+                    scraped_data.append(
+                        [
+                            hashtag,
+                            user,
+                            *user_metadata,
+                            address,
+                            loc.latlng[0],
+                            loc.latlng[1]
+                        ]
+                    )
                     time.sleep(0.2)
                 page_info = user_resp['data']['user']['edge_owner_to_timeline_media']['page_info']
                 if not page_info['has_next_page']:
@@ -102,7 +126,17 @@ def write_output(scraped_data, hashtag):
         print('cant find location data')
     else:
         df = pandas.DataFrame(scraped_data)
-        df.columns = ['hashtag', 'username', 'address', 'lat', 'lng']
+        df.columns = [
+            'hashtag',
+            'username',
+            'followers',
+            'following',
+            'full_name',
+            'profile_pic_url',
+            'address',
+            'lat',
+            'lng'
+        ]
         df.to_csv(f'{hashtag}_output.csv')
 
 def main():
