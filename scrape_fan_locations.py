@@ -1,3 +1,4 @@
+from datetime import datetime
 import requests
 import sys
 import json
@@ -80,6 +81,7 @@ def get_post_metadata(post):
     post_text = post['node']['edge_media_to_caption']['edges'][0]['node']['text'] if len(post['node']['edge_media_to_caption']['edges']) > 0 else ''
     post_text = post_text.replace('\n', '  ')
     post_img_url = post['node']['display_url']
+    post_timestamp = str(datetime.fromtimestamp(post['node']['taken_at_timestamp']))
     post_likes = post['node']['edge_media_preview_like']['count']
     post_comments = post['node']['edge_media_to_comment']['count']
     post_views = post['node']['video_view_count'] if post['node']['is_video'] else None
@@ -87,6 +89,7 @@ def get_post_metadata(post):
         post_id,
         post_text,
         post_img_url,
+        post_timestamp,
         post_likes,
         post_comments,
         post_views
@@ -165,6 +168,7 @@ def write_output(scraped_data, hashtag):
             'post_id',
             'post_text',
             'post_img_url',
+            'post_timestamp',
             'post_likes',
             'post_comments',
             'post_views'

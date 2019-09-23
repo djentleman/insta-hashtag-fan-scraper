@@ -28,6 +28,7 @@ The current dimensions that are exported are as follows:
  - _post\_id_ (Picture level): the id of the picture
  - _post\_text_ (Picture level): the text associated with the picture
  - _post\_img\_url_ (Picture level): the url of the image
+ - _post\_timestamp_ (Picture level): the timestamp of the post
  - _post\_likes_ (Picture level): the number of likes the image has
  - _post\_comments_ (Picture level): the number of comments the image has
  - _post\_views_ (Picture level): the number of views the post has (if its a video, else null)
