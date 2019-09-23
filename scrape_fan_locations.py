@@ -12,10 +12,12 @@ def make_request(url):
     for i in range(5):
         try:
             resp = requests.get(url)
-            return resp
+            return resp.json()
         except requests.exceptions.ConnectionError as e:
             print('Connection Error...')
             time.sleep(1)
+        except json.decoder.JSONDecodeError as e:
+            pass
     return None
 
 
@@ -26,17 +28,19 @@ def get_users(hashtag):
     for i in range(hashtag_page_lim):
         print(f'scraping page {i} of {hashtag}')
         base_url = f'https://www.instagram.com/explore/tags/{hashtag}/?__a=1&max_id={end_cursor}'
-        resp = make_request(base_url).json()
+        resp = make_request(base_url)
+        if resp == None:
+            continue
         hashtag_posts = resp['graphql']['hashtag']['edge_hashtag_to_media']['edges']
         for post in hashtag_posts:
             # get the shortcode
             post_shortcode = post['node']['shortcode']
             # using the shortcode get the uploader
-            try:
-                post_uploader = make_request(f'https://www.instagram.com/p/{post_shortcode}/?__a=1').json()['graphql']['shortcode_media']['owner']
-                users.append((post_uploader['id'], post_uploader['username']))
-            except json.decoder.JSONDecodeError as e:
+            post_uploader = make_request(f'https://www.instagram.com/p/{post_shortcode}/?__a=1')
+            if post_uploader == None:
                 continue
+            post_uploader = post_uploader['graphql']['shortcode_media']['owner']
+            users.append((post_uploader['id'], post_uploader['username']))
         page_info = resp['graphql']['hashtag']['edge_hashtag_to_media']['page_info']
         if not page_info['has_next_page']:
             break
@@ -52,7 +56,14 @@ def get_users(hashtag):
 def get_user_metadata(user):
     print(f'Scraping {user} metadata...')
     user_url = f'https://www.instagram.com/{user}/?__a=1'
-    user_resp = make_request(user_url).json()
+    user_resp = make_request(user_url)
+    if user_resp == None:
+        return (
+            None,
+            None,
+            None,
+            None
+        )
     followers = user_resp['graphql']['user']['edge_followed_by']['count']
     following = user_resp['graphql']['user']['edge_follow']['count']
     full_name = user_resp['graphql']['user']['full_name']
@@ -92,22 +103,16 @@ def get_data_from_users(users, hashtag):
                 print(f'Scrape Page {i} of {user}')
                 user_url = f'https://www.instagram.com/graphql/query/?query_id=17888483320059182&id={user_id}&first=12&after={end_cursor}'
                 print(user_url)
-                try:
-                    user_resp = make_request(user_url).json()
-                    if user_resp['data']['user'] == None:
-                        continue
-                    user_post_data = user_resp['data']['user']['edge_owner_to_timeline_media']['edges']
-                except json.decoder.JSONDecodeError as e:
+                user_resp = make_request(user_url)
+                if user_resp == None or user_resp['data']['user'] == None:
                     continue
+                user_post_data = user_resp['data']['user']['edge_owner_to_timeline_media']['edges']
                 for post in user_post_data:
                     shortcode = post['node']['shortcode']
                     post_metadata = get_post_metadata(post)
-                    try:
-                        resp = make_request(f'https://www.instagram.com/p/{shortcode}/?__a=1').json()['graphql']['shortcode_media']
-                    except json.decoder.JSONDecodeError as e:
-                        continue
+                    resp = make_request(f'https://www.instagram.com/p/{shortcode}/?__a=1')['graphql']['shortcode_media']
                     # check if location is valid
-                    if resp.get('location') == None or resp.get('location').get('address_json') == None:
+                    if resp == None or resp.get('location') == None or resp.get('location').get('address_json') == None:
                         continue
                     resp = json.loads(resp['location']['address_json'])
                     address = ', '.join([resp['street_address'], resp['city_name'], resp['zip_code'], resp['country_code']])
