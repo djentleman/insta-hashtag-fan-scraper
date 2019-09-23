@@ -64,6 +64,23 @@ def get_user_metadata(user):
         profile_pic
     )
 
+def get_post_metadata(post):
+    post_id = post['node']['id']
+    post_text = post['node']['edge_media_to_caption']['edges'][0]['node']['text'] if len(post['node']['edge_media_to_caption']['edges']) > 0 else ''
+    post_text = post_text.replace('\n', '  ')
+    post_img_url = post['node']['display_url']
+    post_likes = post['node']['edge_media_preview_like']['count']
+    post_comments = post['node']['edge_media_to_comment']['count']
+    post_views = post['node']['video_view_count'] if post['node']['is_video'] else None
+    return (
+        post_id,
+        post_text,
+        post_img_url,
+        post_likes,
+        post_comments,
+        post_views
+    )
+
 def get_data_from_users(users, hashtag):
     scraped_data = []
     try:
@@ -84,6 +101,7 @@ def get_data_from_users(users, hashtag):
                     continue
                 for post in user_post_data:
                     shortcode = post['node']['shortcode']
+                    post_metadata = get_post_metadata(post)
                     try:
                         resp = make_request(f'https://www.instagram.com/p/{shortcode}/?__a=1').json()['graphql']['shortcode_media']
                     except json.decoder.JSONDecodeError as e:
@@ -100,11 +118,13 @@ def get_data_from_users(users, hashtag):
                     scraped_data.append(
                         [
                             hashtag,
+                            user_id,
                             user,
                             *user_metadata,
                             address,
                             loc.latlng[0],
-                            loc.latlng[1]
+                            loc.latlng[1],
+                            *post_metadata
                         ]
                     )
                     time.sleep(0.2)
@@ -128,6 +148,7 @@ def write_output(scraped_data, hashtag):
         df = pandas.DataFrame(scraped_data)
         df.columns = [
             'hashtag',
+            'user_id',
             'username',
             'followers',
             'following',
@@ -135,7 +156,13 @@ def write_output(scraped_data, hashtag):
             'profile_pic_url',
             'address',
             'lat',
-            'lng'
+            'lng',
+            'post_id',
+            'post_text',
+            'post_img_url',
+            'post_likes',
+            'post_comments',
+            'post_views'
         ]
         df.to_csv(f'{hashtag}_output.csv')
 

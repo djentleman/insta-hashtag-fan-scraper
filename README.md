@@ -16,16 +16,23 @@ would produce a csv file called `italy_output.csv` containing data about the pos
 The current dimensions that are exported are as follows:
 
  - _hashtag_ (Search level): The hashtag used in the search, in the above example this would be `italy`.
+ - _user\_id_ (User level): The user id of the instagram user who posted the picture
  - _username_ (User level): The username of the instagram user who posted the picture
  - _followers_ (User level): The number of followers the user has
  - _following_ (User level): The number of accounts the users is following
- - _full_name_ (User level): The full name of the user
+ - _full\_name_ (User level): The full name of the user
  - _profile\_pic\_url_ (User level): The profile picture url of the user
  - _address_ (Picture level): The address of the picture - this is used to forward geocode the lat/lng
  - _lat_ (Picture level): The Latitude of the picture
  - _lng_ (Picture Level): The Longitude of the picture
+ - _post\_id_ (Picture level): the id of the picture
+ - _post\_text_ (Picture level): the text associated with the picture
+ - _post\_img\_url_ (Picture level): the url of the image
+ - _post\_likes_ (Picture level): the number of likes the image has
+ - _post\_comments_ (Picture level): the number of comments the image has
+ - _post\_views_ (Picture level): the number of views the post has (if its a video, else null)
 
- There are 3 different 'levels', the hashtag being search, the accounts (users) associated with that hashtag, and the posts those users made
+There are 3 different 'levels', the hashtag being search, the accounts (users) associated with that hashtag, and the posts those users made
 
 ## Method
 
