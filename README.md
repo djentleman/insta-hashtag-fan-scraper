@@ -19,7 +19,6 @@ The current dimensions that are exported are as follows:
  - _user\_id_ (User level): The user id of the instagram user who posted the picture
  - _username_ (User level): The username of the instagram user who posted the picture
  - _followers_ (User level): The number of followers the user has
- - _following_ (User level): The number of accounts the users is following
  - _full\_name_ (User level): The full name of the user
  - _profile\_pic\_url_ (User level): The profile picture url of the user
  - _address_ (Picture level): The address of the picture - this is used to forward geocode the lat/lng

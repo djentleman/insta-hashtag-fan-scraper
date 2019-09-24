@@ -69,22 +69,20 @@ def get_users(hashtag):
 
 def get_user_metadata(user):
     print(f'Scraping {user} metadata...')
-    user_url = f'https://www.instagram.com/{user}/?__a=1'
+    user_url = f'https://www.instagram.com/web/search/topsearch/?query={user}'
+    print(user_url)
     user_resp = make_request(user_url)
-    if user_resp == None:
+    if user_resp == None or len(user_resp['users']) == 0:
         return (
-            None,
             None,
             None,
             None
         )
-    followers = user_resp['graphql']['user']['edge_followed_by']['count']
-    following = user_resp['graphql']['user']['edge_follow']['count']
-    full_name = user_resp['graphql']['user']['full_name']
-    profile_pic = user_resp['graphql']['user']['profile_pic_url_hd']
+    followers = user_resp['users'][0]['user']['follower_count']
+    full_name = user_resp['users'][0]['user']['full_name']
+    profile_pic = user_resp['users'][0]['user']['profile_pic_url']
     return (
         followers,
-        following,
         full_name,
         profile_pic
     )
@@ -172,7 +170,6 @@ def write_output(scraped_data, hashtag):
             'user_id',
             'username',
             'followers',
-            'following',
             'full_name',
             'profile_pic_url',
             'address',
