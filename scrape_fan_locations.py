@@ -9,15 +9,28 @@ import time
 hashtag_page_lim = 10 # number of pages of the 'explore' page to scrape
 user_page_lim = 5 # number of pages of each account to scrape
 
+request_headers = {
+    'accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,image/apng,*/*;q=0.8,application/signed-exchange;v=b3',
+    'accept-encoding': 'gzip, deflate, br',
+    'accept-language': 'en-GB,en;q=0.9,en-US;q=0.8,ja;q=0.7',
+    'cache-control': 'max-age=0',
+    'sec-fetch-mode': 'navigate',
+    'sec-fetch-site': 'none',
+    'sec-fetch-user': '?1',
+    'upgrade-insecure-requests': '1',
+    'user-agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/77.0.3865.90 Safari/537.36',
+}
+
 def make_request(url):
     for i in range(5):
         try:
-            resp = requests.get(url)
+            resp = requests.get(url, headers=request_headers)
             return resp.json()
         except requests.exceptions.ConnectionError as e:
             print('Connection Error...')
             time.sleep(1)
         except json.decoder.JSONDecodeError as e:
+            print('JSON Decode Error...')
             pass
     return None
 
