@@ -78,11 +78,11 @@ def get_user_metadata(user):
             None,
             None
         )
-    followers = user_resp['users'][0]['user']['follower_count']
+    #followers = user_resp['users'][0]['user']['follower_count']
     full_name = user_resp['users'][0]['user']['full_name']
     profile_pic = user_resp['users'][0]['user']['profile_pic_url']
     return (
-        followers,
+        #followers,
         full_name,
         profile_pic
     )
@@ -169,7 +169,7 @@ def write_output(scraped_data, hashtag):
             'hashtag',
             'user_id',
             'username',
-            'followers',
+            #'followers',
             'full_name',
             'profile_pic_url',
             'address',
